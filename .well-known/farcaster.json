@@ -1,16 +1,16 @@
 {
   "accountAssociation": {
-    "header": "<REPLACE_WITH_HEADER_FROM_WARPCAST>",
-    "payload": "<REPLACE_WITH_PAYLOAD_FROM_WARPCAST>",
-    "signature": "<REPLACE_WITH_SIGNATURE_FROM_WARPCAST>"
+    "header": "eyJmaWQiOjM0NjA3NSwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDEwQjUzYTlGNDFBNzhlNENDQ0FhZUEyQzUxZGZiNUY2RmYwMjIzMTgifQ",
+    "payload": "eyJkb21haW4iOiJtaW50LWZhcmNhc3Rlci1wdW5rcy52ZXJjZWwuYXBwIn0",
+    "signature": "oj6zjvLwkBRmYw9/fXsESMQsKET14DVlEUA5H5JxtW9MBnvBIEbyMBV/zAqIQQm4IefxBn3hraMq664UWkFW4xs="
   },
   "frame": {
     "version": "1",
     "name": "Farcaster Punks \u2014 Official Mint",
-    "homeUrl": "https://fpp-sable.vercel.app/",
+    "homeUrl": "https://mint-farcaster-punks.vercel.app/",
     "imageUrl": "https://chocolate-major-guan-717.mypinata.cloud/ipfs/bafybeiafbdvvk4u66oe22sv2onpiznlwulgpnmdixxh4bhb62xsrw6ms6e",
     "iconUrl": "https://chocolate-major-guan-717.mypinata.cloud/ipfs/bafybeiafbdvvk4u66oe22sv2onpiznlwulgpnmdixxh4bhb62xsrw6ms6e",
-    "postUrl": "https://fpp-sable.vercel.app/api/mint",
+    "postUrl": "https://mint-farcaster-punks.vercel.app/mint",
     "buttons": [
       {
         "title": "Mint Now"
