@@ -5,7 +5,7 @@
   <title>Farcaster Punks — Mint</title>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
 
-  <!-- ✅ Miniapp Embed Tag -->
+  <!-- fc:miniapp embed tag -->
   <meta name="fc:miniapp" content='{
     "version": "next",
     "imageUrl": "https://chocolate-major-guan-717.mypinata.cloud/ipfs/bafybeiafbdvvk4u66oe22sv2onpiznlwulgpnmdixxh4bhb62xsrw6ms6e",
@@ -20,83 +20,189 @@
   }' />
 
   <style>
-    body{background:#0b0720;color:#fff;font-family:Inter,ui-sans-serif;padding:24px;display:flex;justify-content:center;align-items:center;min-height:100vh}
-    .card{max-width:720px;width:100%;background:rgba(255,255,255,0.03);padding:28px;border-radius:12px;text-align:center}
-    button{background:#7c3aed;border:none;color:#fff;padding:12px 18px;border-radius:8px;cursor:pointer}
-    .muted{color:#b9b6cb}
-    .row{display:flex;gap:16px;justify-content:center;margin-top:18px}
+    :root{--bg:#0b0720;--card:rgba(255,255,255,0.03);--muted:#b9b6cb;--accent:#7c3aed}
+    html,body{height:100%;margin:0}
+    body{background:var(--bg);color:#fff;font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;padding:24px;display:flex;align-items:center;justify-content:center}
+    .card{max-width:880px;width:100%;background:var(--card);padding:28px;border-radius:12px;text-align:center}
+    img.logo{width:150px;height:150px;border-radius:12px;object-fit:cover}
+    h1{margin:16px 0 6px;font-size:20px}
+    .muted{color:var(--muted)}
+    .row{display:flex;gap:12px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+    button{background:var(--accent);border:none;color:#fff;padding:10px 16px;border-radius:10px;cursor:pointer}
+    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06)}
+    .small{font-size:13px}
+    #status{margin-top:12px;color:var(--muted)}
+    .error{color:#ff6b6b}
+    input.qty{width:70px;padding:8px;border-radius:8px;border:none;background:rgba(255,255,255,0.04);color:#fff;text-align:center}
+    footer{margin-top:18px;color:var(--muted);font-size:13px}
+    .controls-inline{display:flex;gap:8px;align-items:center;justify-content:center}
   </style>
+
+  <!-- ethers CDN (v6) -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.min.js"></script>
 </head>
 <body>
-  <div class="card">
-    <img src="https://chocolate-major-guan-717.mypinata.cloud/ipfs/bafybeiafbdvvk4u66oe22sv2onpiznlwulgpnmdixxh4bhb62xsrw6ms6e" alt="logo" style="width:160px;border-radius:12px"/>
+  <div class="card" id="app">
+    <img class="logo" id="logo" src="https://chocolate-major-guan-717.mypinata.cloud/ipfs/bafybeiafbdvvk4u66oe22sv2onpiznlwulgpnmdixxh4bhb62xsrw6ms6e" alt="logo">
     <h1>Farcaster Punks — Official Mint</h1>
-    <p class="muted">Mint directly in Warpcast — open & press Mint Now</p>
+    <div id="subtitle" class="muted small">Mint directly in Warpcast or connect a wallet to mint from browser.</div>
 
-    <div id="status" class="muted">Not connected</div>
+    <div id="status">Not connected</div>
 
     <div class="row">
       <button id="connectBtn">Connect Wallet</button>
-      <button id="mintBtn" disabled>Mint Now</button>
+
+      <div class="controls-inline">
+        <input id="qty" class="qty" type="number" min="1" value="1" title="Quantity" />
+        <button id="mintBtn" disabled>Mint Now</button>
+      </div>
+
+      <button id="openseaBtn" class="ghost">Mint on OpenSea</button>
     </div>
 
-    <p class="muted" style="margin-top:18px">Once connected, press Mint Now to submit transaction using your wallet.</p>
+    <div id="price" class="muted small" style="margin-top:12px">Price: -</div>
+    <div id="log" class="muted small" style="margin-top:8px"></div>
+    <footer>© 2025 Farcaster Punks — MiniApp static preview</footer>
   </div>
 
 <script>
-const SEADROP_ADDRESS = "0x00005EA00Ac477B1030CE78506496e8C2dE24bf5"; // contoh SeaDrop
-const NFT_CONTRACT = "0x4d749dc4016936759e437b1a01d2ef0f0690e651"; // ganti kontrakmu
+/*
+  Client-only mint UI:
+  - Replace SEADROP_ADDRESS and NFT_CONTRACT below
+  - Mint Now: calls seadrop.getPublicDrop and seadrop.mintPublic with user's signer
+  - Mint on OpenSea: opens collection page
+  - Robust: try/catch everywhere
+*/
+
+const SEADROP_ADDRESS = "0x00005EA00Ac477B1030CE78506496e8C2dE24bf5"; // <-- CHANGE to your SeaDrop address
+const NFT_CONTRACT    = "0x4d749dc4016936759e437b1a01d2ef0f0690e651"; // <-- CHANGE to your NFT contract
+const OPENSEA_URL     = "https://opensea.io/collection/farcaster-punks-59466883/overview"; // <-- change if needed
+
 const SEADROP_ABI = [
   "function getPublicDrop(address nftContract) external view returns (uint80 mintPrice, uint48 startTime, uint48 endTime, uint16 maxTotalMintableByWallet, uint16 feeBps, bool restrictFeeRecipients)",
   "function mintPublic(address nftContract, address feeRecipient, address minterIfNotPayer, uint256 quantity) external payable"
 ];
 
-let provider, signer, userAddress;
-const statusEl = document.getElementById('status');
 const connectBtn = document.getElementById('connectBtn');
 const mintBtn = document.getElementById('mintBtn');
+const openseaBtn = document.getElementById('openseaBtn');
+const qtyInput = document.getElementById('qty');
+const statusEl = document.getElementById('status');
+const priceEl = document.getElementById('price');
+const logEl = document.getElementById('log');
 
-async function connect() {
-  if (window.ethereum) {
-    provider = new ethers.BrowserProvider(window.ethereum);
+let provider = null;
+let signer = null;
+let userAddress = null;
+
+// helper
+function setLog(msg, err=false) {
+  console.log(msg);
+  logEl.innerText = typeof msg === 'string' ? msg : JSON.stringify(msg);
+  if (err) logEl.classList.add('error'); else logEl.classList.remove('error');
+}
+
+// read public drop price (read-only) using a temporary provider
+async function fetchPrice() {
+  try {
+    // fallback: if ethers present use default provider via window.ethereum if available
+    const readProvider = (window.ethers && window.ethers.BrowserProvider && window.ethereum)
+      ? new window.ethers.BrowserProvider(window.ethereum)
+      : new window.ethers.JsonRpcProvider("https://mainnet.base.org"); // fallback RPC (change if needed)
+
+    const seadropRead = new window.ethers.Contract(SEADROP_ADDRESS, SEADROP_ABI, readProvider);
+    const publicDrop = await seadropRead.getPublicDrop(NFT_CONTRACT);
+    const mintPrice = BigInt(publicDrop[0].toString ? publicDrop[0].toString() : publicDrop[0]);
+    priceEl.innerText = "Price: " + window.ethers.formatEther(mintPrice) + " ETH (each)";
+    return mintPrice;
+  } catch (e) {
+    priceEl.innerText = "Price: unavailable";
+    setLog("Cannot fetch price: " + (e?.message || e), true);
+    return null;
+  }
+}
+
+// connect wallet
+async function connectWallet() {
+  try {
+    if (!window.ethereum) {
+      alert("No injected wallet detected. Use Warpcast in-app wallet or MetaMask.");
+      return;
+    }
+    provider = new window.ethers.BrowserProvider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
     signer = await provider.getSigner();
     userAddress = await signer.getAddress();
     statusEl.innerText = "Connected: " + userAddress;
-    connectBtn.innerText = 'Connected';
+    connectBtn.innerText = "Connected";
     mintBtn.disabled = false;
-  } else {
-    alert('No injected wallet found. Use Warpcast in-app or install MetaMask / WalletConnect.');
+    setLog("Connected: " + userAddress);
+    // refresh price after connect (optional)
+    await fetchPrice();
+  } catch (e) {
+    setLog("Connect error: " + (e?.message || e), true);
   }
 }
 
-async function mint() {
+// mint action: uses signer to pay (user pays gas and price)
+async function mintNow() {
   try {
     mintBtn.disabled = true;
+    setLog("Starting mint...");
     statusEl.innerText = "Preparing mint...";
+    if (!signer) throw new Error("Wallet not connected");
 
-    const seadrop = new ethers.Contract(SEADROP_ADDRESS, SEADROP_ABI, provider);
-    const publicDrop = await seadrop.getPublicDrop(NFT_CONTRACT);
+    const seadrop = new window.ethers.Contract(SEADROP_ADDRESS, SEADROP_ABI, signer);
+
+    // get public drop price (use provider on contract)
+    const readProvider = provider || new window.ethers.BrowserProvider(window.ethereum);
+    const seadropRead = new window.ethers.Contract(SEADROP_ADDRESS, SEADROP_ABI, readProvider);
+    const publicDrop = await seadropRead.getPublicDrop(NFT_CONTRACT);
     const mintPrice = BigInt(publicDrop[0].toString ? publicDrop[0].toString() : publicDrop[0]);
-    const qty = 1n;
-    const total = mintPrice * qty;
 
-    const seadropWithSigner = new ethers.Contract(SEADROP_ADDRESS, SEADROP_ABI, signer);
-    const tx = await seadropWithSigner.mintPublic(NFT_CONTRACT, ethers.ZeroAddress, userAddress, Number(qty), { value: total });
+    // quantity
+    let qty = Number(qtyInput.value || 1);
+    if (isNaN(qty) || qty < 1) qty = 1;
+    // compute total
+    const total = mintPrice * BigInt(qty);
+
+    // send mintPublic with signer (user pays)
+    statusEl.innerText = "Sending transaction...";
+    setLog(`Minting ${qty} × price ${window.ethers.formatEther(mintPrice)} ETH (total ${window.ethers.formatEther(total)} ETH)`);
+
+    // create contract with signer
+    const seadropWithSigner = new window.ethers.Contract(SEADROP_ADDRESS, SEADROP_ABI, signer);
+    const tx = await seadropWithSigner.mintPublic(NFT_CONTRACT, window.ethers.ZeroAddress, userAddress, qty, { value: total });
     statusEl.innerText = "Tx sent: " + tx.hash;
+    setLog("Tx sent: " + tx.hash);
     await tx.wait();
     statusEl.innerText = "Mint complete: " + tx.hash;
+    setLog("Mint complete: " + tx.hash);
   } catch (e) {
-    console.error(e);
-    statusEl.innerText = "Mint error: " + (e?.message || e);
+    setLog("Mint failed: " + (e?.message || e), true);
+    statusEl.innerText = "Error: " + (e?.message || e);
   } finally {
     mintBtn.disabled = false;
   }
 }
 
-connectBtn.onclick = connect;
-mintBtn.onclick = mint;
+connectBtn.onclick = connectWallet;
+mintBtn.onclick = mintNow;
+openseaBtn.onclick = () => window.open(OPENSEA_URL, "_blank");
+
+// initial price fetch (non-blocking)
+(async() => {
+  try {
+    if (!window.ethers) {
+      setLog("Ethers not loaded; wallet features may not work.", true);
+      priceEl.innerText = "Price: unavailable (ethers not loaded)";
+      return;
+    }
+    await fetchPrice();
+  } catch (e) {
+    setLog("Init error: " + (e?.message || e), true);
+  }
+})();
 </script>
 </body>
 </html>
