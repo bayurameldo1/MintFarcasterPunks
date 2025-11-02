@@ -5,54 +5,51 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Farcaster Punks — Mint</title>
 
-  <!-- Manifest for Farcaster -->
-  <link rel="manifest" href="/.well-known/farcaster.json">
+  <!-- 🔥 Embed metadata agar Warpcast/Base mengenali miniapp -->
+  <meta name="fc:miniapp" content='{
+    "version": "next",
+    "imageUrl": "https://chocolate-major-guan-717.mypinata.cloud/ipfs/bafybeiafbdvvk4u66oe22sv2onpiznlwulgpnmdixxh4bhb62xsrw6ms6e",
+    "button": {
+      "title": "Mint Now",
+      "action": {
+        "type": "launch_miniapp",
+        "name": "Farcaster Punks — Mint",
+        "url": "https://mint-farcaster-punks.vercel.app/"
+      }
+    }
+  }' />
 
-  <!-- Open Graph & Twitter card -->
-  <meta property="og:type" content="website" />
+  <!-- OG/Twitter card -->
   <meta property="og:title" content="Farcaster Punks — Mint" />
-  <meta property="og:description" content="Mint Farcaster Punks directly from Warpcast — open in the Farcaster app to mint." />
+  <meta property="og:description" content="Mint langsung di Warpcast tanpa keluar aplikasi" />
   <meta property="og:image" content="https://chocolate-major-guan-717.mypinata.cloud/ipfs/bafybeiafbdvvk4u66oe22sv2onpiznlwulgpnmdixxh4bhb62xsrw6ms6e" />
   <meta name="twitter:card" content="summary_large_image" />
 
+  <!-- Manifest Farcaster -->
+  <link rel="manifest" href="/.well-known/farcaster.json" />
+
   <style>
-    :root{--bg:#07020b;--accent:#7c3aed;--muted:#b9b6cb}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#05020a,#0b0420);color:#fff}
-    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
-    .card{width:100%;max-width:920px;background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.02));padding:28px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
-    .row{display:flex;gap:18px;align-items:center}
-    img.logo{width:140px;height:140px;border-radius:12px;object-fit:cover}
-    h1{margin:0;font-size:24px}
-    p.muted{color:var(--muted)}
-    .buttons{margin-top:16px;display:flex;gap:12px;flex-wrap:wrap}
-    .btn{padding:10px 16px;border-radius:10px;text-decoration:none;color:#fff;font-weight:600}
-    .btn.primary{background:var(--accent)}
-    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);}
-    footer{margin-top:18px;color:var(--muted);font-size:13px}
+    :root { --accent:#7c3aed; --bg:#080313; --muted:#b9b6cb; }
+    html,body { margin:0; height:100%; font-family:Inter,system-ui,sans-serif; background:var(--bg); color:#fff; }
+    .container { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:24px; text-align:center; }
+    img.logo { width:160px; height:160px; border-radius:12px; object-fit:cover; box-shadow:0 0 12px rgba(0,0,0,0.5); }
+    h1 { font-size:26px; margin:20px 0 10px; }
+    p { max-width:480px; color:var(--muted); line-height:1.4; }
+    a.button { display:inline-block; background:var(--accent); color:#fff; text-decoration:none; padding:12px 20px; border-radius:10px; margin-top:18px; font-weight:600; }
+    a.button:hover { opacity:.9; }
+    footer { margin-top:30px; font-size:13px; color:#777; }
   </style>
 </head>
+
 <body>
-  <main class="wrap">
-    <div class="card" role="main">
-      <div class="row">
-        <img class="logo" src="https://chocolate-major-guan-717.mypinata.cloud/ipfs/bafybeiafbdvvk4u66oe22sv2onpiznlwulgpnmdixxh4bhb62xsrw6ms6e" alt="Farcaster Punks logo" />
-        <div style="flex:1">
-          <h1>Farcaster Punks — Official Mint</h1>
-          <p class="muted">Open this page in Warpcast / Farcaster to use the in-app mini app (embed). Or use the links below.</p>
+  <div class="container">
+    <img class="logo" src="https://chocolate-major-guan-717.mypinata.cloud/ipfs/bafybeiafbdvvk4u66oe22sv2onpiznlwulgpnmdixxh4bhb62xsrw6ms6e" alt="Farcaster Punks" />
+    <h1>Farcaster Punks — Official Mint</h1>
+    <p>Buka halaman ini di aplikasi Warpcast untuk mencoba mint langsung tanpa keluar dari Farcaster.</p>
 
-          <div class="buttons">
-            <a class="btn primary" id="mintNow" href="https://opensea.io/collection/farcaster-punks-59466883/overview" target="_blank" rel="noreferrer">Mint Now (OpenSea)</a>
-            <a class="btn ghost" id="viewCollection" href="https://opensea.io/collection/farcaster-punks-59466883/overview" target="_blank" rel="noreferrer">View on OpenSea</a>
-          </div>
+    <a class="button" href="https://opensea.io/collection/farcaster-punks-59466883/overview" target="_blank" rel="noreferrer">Mint di OpenSea</a>
 
-          <p class="muted" style="margin-top:12px">If your Warpcast shows "Open URL" instead of embed, follow the README checklist in this ZIP to fix headers/manifest exactness.</p>
-        </div>
-      </div>
-
-      <footer>
-        <div>Disclaimer: This static package is client-only. For real on-chain mint via SeaDrop you need either user wallet signing (client) or a server relayer (not included).</div>
-      </footer>
-    </div>
-  </main>
+    <footer>© 2025 Farcaster Punks — MiniApp static preview</footer>
+  </div>
 </body>
 </html>
